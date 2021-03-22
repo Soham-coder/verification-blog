@@ -216,7 +216,7 @@ input wstrb = indicating which are valid byte lanes in wdata
 output rdata = read data
 
 Write the basic code (just the scratch template) for the sequence item and possible driving logic (write + read)
-and sampling function/logic for wdata on basis of wstrb which will be used in monitor
+and sampling function/logic for wdata on basis of wstrb which can be used in monitor
 ---
 ```
 ```cpp
@@ -323,9 +323,9 @@ endclass : mem_driver
 ```cpp
 //function for sampling wdata on basis of wstrb in monitor
 function logic[`DATA_WIDTH-1:0] sample_data_on_strb
-(input 
-	bit [`DATA_WIDTH-1:0] wdata, 
-	bit [`DATA_WIDTH/8-1:0] wstrb
+(
+	input bit [`DATA_WIDTH-1:0] wdata, 
+	input bit [`DATA_WIDTH/8-1:0] wstrb
 );
 
 logic [`DATA_WIDTH-1:0] sampled_data; 
@@ -341,8 +341,8 @@ return sampled_data;
 endfunction : sample_data_on_strb
 
 
-//Ex- wdata[31:0] = abcdef9a
-//    wstrb[3:0] = 1100
+//Ex- wdata[31:0] = abcdef9a (hex)
+//    wstrb[3:0] = 1100 (binary)
 
 //i = 0, wstrb[0]=0, skip
 //i = 1, wstrb[1]=0, skip
@@ -362,7 +362,7 @@ class parent;
 endclass:parent
 
 class child extends parent;
-function void_print();
+function void print();
 $display("this is child");
 endfunction
 endclass
@@ -380,8 +380,8 @@ p.print(); //Ans - "this is parent"
 c.print(); //Ans - "this is child"
 //In this case different forms of the method print(of parent class) is done by naming the parent method as virtual
 //So basically when we call the child print method it first determines the type of handle the child has.
-//Now child class is pointing to no one else and is of type child and so it goes up the hierarchy finds the function type to be 
-//virtual in parent. So comes down and calls child implementation 
+//Now child class is pointing to no one else and is of type child and so it goes up the hierarchy and finds that the called function type to be 
+//virtual in parent. So it comes down and calls child implementation 
 end
 
 //case 2
@@ -416,13 +416,13 @@ child c_temp;
 
 c = new; //create child instance
 p = c; //parent now contains child
-//c_temp = p; //This will fail due to static type checking at compile time
-$cast(c_temp, p); //This will be success due to dynamic type checking at run time
+//c_temp = p; //Static casting or copying will fail due to static type checking at compile time 
+$cast(c_temp, p); //Dynamic casting will be a success due to dynamic type checking at run time
 
 p.print();//Ans- "this is child"
 c_temp.print();//Ans - "this is child"
 //Now p is pointing to child. So child function will be called because of virtual method
-//c_temp is pointing to parent which in turn points to child , so child function will be called because of virtual method
+//c_temp is pointing to parent which in turn points to child, so child function will be called because of virtual method
 end
 
 
@@ -435,7 +435,7 @@ endmodule
 Q2: If you declare the child method as also virtual what will happen
 ```
 ```
-Ans - Child methods are by default virtual even if they are not implicitly mentioned/declared provided the parent has a virtual method
+Ans - Child methods are by default virtual even if they are not implicitly mentioned/declared provided the parent's method is virtual
 
 So for all the cases i.e., 1,2,3 prints will remain the same
 ```
@@ -445,10 +445,12 @@ So for all the cases i.e., 1,2,3 prints will remain the same
 Q3: If you don't put virtual keyword in both child and parent what will happen
 ```
 ```
-Now methods will be called solely depending on class type. If function/method names are same in parent and child child method will override parent method.
+Now methods will be called solely depending on class type 
+If function/method names are same in parent and child, child method will override parent method
 And even if a parent class is pointing to child instance 
 or a child handle is pointing to parent which in turn is pointing to child instance....none of that matters
-because when you will call the methods it will be called solely on class types i.e., visibility of methods is limited to the type of class it is and not on the type of handle it is pointing to.
+because when you will call the methods it will be called solely on class types i.e., 
+visibility of methods is limited to the type of class it is and not on the type of handle it is pointing to
 
 So 
 For case 1,2,3:
@@ -485,7 +487,7 @@ rand burst_size burst_size_t;
 
 constraint generate_burst_aligned_address{
 	burst_size_t === 1BYTE -> AWADDR = AWADDR;//2**0 = 1
-	burst_size_t === 2BYTE -> AWADDR[0] = 2'b0;//2**1 = 2 
+	burst_size_t === 2BYTE -> AWADDR[0] = 1'b0;//2**1 = 2 
 	burst_size_t === 4BYTE -> AWADDR[1:0] = 2'b0;//2**2 = 4
 	burst_size_t === 8BYTE -> AWADDR[2:0] = 3'b0;//2**3 = 8
 	burst_size_t === 16BYTE -> AWADDR[3:0] = 4'b0;//2**4 = 16
@@ -505,7 +507,8 @@ endclass
 Q2: Suppose your AXI master is not sending burst aligned addresses for transfers. Provided you are given Burst zise and address how will you determine how many bytes it is unaligned to burst size   
 ```
 ```cpp
-package
+
+package abc;
 
 //burst_size will indicate how many bytes of data bus are used in each tranfers/beats(clk)
 
@@ -531,7 +534,7 @@ byte unaligned_offset;
 case(burst_size)
 1BYTE : unaligned_offset = 0;
 2BYTE : unaligned_offest = byte'(address[0]); //Static cast to byte size 
-//take the axsize no of bits in lsb and fill remaining msbs to 0s
+//i.e., take the axsize no of bits in lsb and fill remaining msbs to 0s
 4BYTE : unaligned_offset = byte'(address[1:0]);
 8BYTE : unaligned_offset = byte'(address[2:0]);
 16BYTE :unaligned_offset = byte'(address[3:0]);

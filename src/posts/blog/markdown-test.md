@@ -54,7 +54,7 @@ module sync_fifo (clk, rst, wdata, rdata, wr_en, rd_en, full, empty);
 
 //Init mem when reset
 	
-	always@(posedge clk, posedge rst)
+	always_ff@(posedge clk, posedge rst)
         begin//
             if(rst)begin
             for(i=0; i<DEPTH;i++)
@@ -63,14 +63,14 @@ module sync_fifo (clk, rst, wdata, rdata, wr_en, rd_en, full, empty);
         end//
 
 //Write to Fifo
-    always@(posedge clk, posedge rst)
+    always_ff@(posedge clk, posedge rst)
 	    begin
 	        if(wr_en && ~full)
 		        mem[wr_pt] <= wdata;
 	    end
 
 //Default val of read data when reset
-    always@(posedge clk, posedge rst)
+    always_ff@(posedge clk, posedge rst)
         begin
 	        if(rst)
                 rdata <= 0;
@@ -78,14 +78,14 @@ module sync_fifo (clk, rst, wdata, rdata, wr_en, rd_en, full, empty);
 
 
 //Read from Fifo
-    always@(posedge clk, posedge rst)
+    always_ff@(posedge clk, posedge rst)
 	    begin
 	        if(rd_en && ~empty)
                 rdata_temp <= mem[rd_pt];
         end
 
 //Maintain the wr pointer
-    always@(posedge clk, posedge rst)
+    always_ff@(posedge clk, posedge rst)
 	    begin
 	        if(rst)
 		        wr_pt <= 0;
@@ -94,7 +94,7 @@ module sync_fifo (clk, rst, wdata, rdata, wr_en, rd_en, full, empty);
         end
 
 //Maintain the rd pointer
-      always@(posedge clk, posedge rst)
+      always_ff@(posedge clk, posedge rst)
         begin
             if(rst)
                 rd_pt <= 0;
@@ -114,7 +114,7 @@ endmodule
 
 ////  1 wr at 0th loc wdata wr_pt = 1
 ////  1 rd at 0th loc rdata rd_pt = 1 --> empty signal goes high
-////  32 wr at 0-31th locs wdata wr_pt = 1 0000 & rd_pt = 0 0000 --> full signal goes high 
+////  32 wr at 0-31th locs wdata wr_pt = 1 00000 & rd_pt = 0 00000 --> full signal goes high 
 
 ```
 
@@ -493,7 +493,7 @@ class data_drv extends uvm_driver #(data_transaction);
 	 
 	endfunction 
 
-	//Task for checking if reset on and then sending appropriate wr_en & rd_en
+	//Task for checking if reset is on and then sending appropriate wr_en & rd_en
 	task reset_check();
 	
 	forever begin
@@ -962,9 +962,6 @@ class base_test extends uvm_test;
 
 	//take the handle of the env
 	env env_h;
-
-	//take the handle of virtual seq base
-	//top_vseq_base top_vseq_base_h;
 	
 	//new func
 	function new(string name = "base_test", uvm_component parent = null);
@@ -1027,11 +1024,11 @@ class test extends base_test;
 	
 	//call the seqr_init
 	seqr_init(vseq_rst_data_h); //vseq_rst_data_h is extended from top_vseq_base_h which have pointers to child sequencers
-	//if this is passed as an argument to above func, then pointers will be correctly redirected from null--> agent seqr
+	//if this is passed as an argument to above func, then pointers will be correctly redirected from null to agent seqrs
 	
 	vseq_rst_data_h.start(null); //when the seq is started on null it actually calls body task
-	//which in turn starts child sequences on child sequencer
-	//basically does not matter on which seqr I am starting this seq on
+	//which in turn starts child sequences on child sequencer of respective agents
+	//So it basically does not matter on which seqr you are starting this seq on
 	
 	//drop objection
 	phase.drop_objection(this);

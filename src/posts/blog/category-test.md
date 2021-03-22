@@ -24,7 +24,7 @@ output b;
 reg c;
 always_ff@(posedge clk)
 begin
- c = a; //LHS will be eavaluated in active region and RHS will be updated in active region. So c will get value a as well as b will also get value a if they are printed by system task $display. It will synthesize to only 1 flop with a as input and b=c as output with clk
+ c = a; //LHS will be evaluated in active region and RHS will be updated in active region. So c will get value a as well as b will also get value a .Their values will get reflected if printed by system task $display or $strobe. It will synthesize to only 1 flip-flop with a as input and b=c as output with "clk" as clock of the flip-flop
  b = c;
 end
 ```
@@ -37,8 +37,12 @@ output b;
 reg c;
 always_ff@(posedge clk)
 begin
- c <= a;//LHS will be evaluated in active region and RHS will be updated in NBA region. So c will get value of a, and b will get value of c if they are printed by system task $strobe which occurs at the NBA region. It will synthesize to 2 f/fs - 1st flop with i/p as a and o/p as c - 2nd flop with i/p as c and o/p as b, both clocked by the same clock "clk"
- b <= c; //This also leads to addition of pipeline registers where we put registers or f/fs in critical path i.e., longest combinational loop to break it down into shorter sequential paths
+ c <= a;//LHS will be evaluated in active region and RHS will be updated in NBA region. So c will get value of a, and b will get value of c
+ //Their values will be reflected if they are printed by system task $strobe which occurs at the NBA region. 
+ //It will synthesize to 2 f/fs - 1st flop with i/p as a and o/p as c
+ //2nd flop with i/p as c and o/p as b, both clocked by the same clock "clk"
+ b <= c; 
+ //This is also the way for addition of pipeline registers where we put registers or f/fs in critical path i.e., longest combinational loop to break it down into shorter sequential paths
 end
 ```
 
@@ -51,7 +55,10 @@ Q2: Frequency divider or clock divider by 2
 ```md
 For the circuit-
 
-We have a f_f with input d and output q and ~q clocked by clock "clk" which needs to be divided. If you connect ~q with input d then the output q will be your desired output
+We have a flip-flop with input d and output q and ~q clocked by clock "clk"
+//The input clk needs to be divided by 2 
+//So if you connect output ~q with input d then the normal output q 
+//will act as your divided_by_2 clock
 ```
 ```cpp
 module freq_divider_by_2(rst, clk, clk_by_2);
