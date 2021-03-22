@@ -435,7 +435,7 @@ endmodule
 Q2: If you declare the child method as also virtual what will happen
 ```
 ```
-Ans - Child methods are by default virtual even if they are not implicitly mentioned/declared provided the parent's method is virtual
+Ans - Child methods are by default virtual even if they are not explicitly mentioned/declared provided the parent's method is virtual
 
 So for all the cases i.e., 1,2,3 prints will remain the same
 ```
