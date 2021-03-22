@@ -1,6 +1,6 @@
 ---
 title: "UVM common coding problems "
-category: "Interview"
+category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "UVM common coding scenarios"
 thumbnail: "./images/markdown-test/thumbnail.jpg"

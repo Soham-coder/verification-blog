@@ -1,6 +1,6 @@
 ---
 title: "Verilog common questions"
-category: "Interview"
+category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Famous verilog questions"
 thumbnail: "./images/default.jpg"
