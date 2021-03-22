@@ -1,8 +1,8 @@
 ---
-title: "SV interview questions"
+title: "SV questions"
 category: "Interview"
 date: "2020-01-28 12:00:00 +09:00"
-desc: "SV problem solving questions I encountered in interviews"
+desc: "SV problem solving questions"
 thumbnail: "./images/getting-started/thumbnail.jpg"
 alt: "apple and shaking hands"
 ---

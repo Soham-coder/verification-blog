@@ -2,7 +2,7 @@
 title: "UVM Basics"
 category: "Code"
 date: "2020-01-28 12:00:00 +09:00"
-desc: "Data Modelling"
+desc: "Data Modelling (under 🚧!)"
 thumbnail: "./images/code-block/thumbnail.jpg"
 alt: "code block graphic"
 ---
