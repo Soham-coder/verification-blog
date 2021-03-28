@@ -91,6 +91,7 @@ eg., 00..1, 0111.., 01, 001, 011, 1, 1.., 11 etc.,
 ```
 ```md
 *Disclaimer- I have not faced this type of question before where sequence can be multiple combinations - So please do point out if you see any flaw or states that have not been considered*
+*Error Note- In figure transition should be S8 --> S2 (0/0) !!!*
 ```
 
 
@@ -166,8 +167,9 @@ unique_case (current_state)
     
     S6   :  (!data_in) ? next_state = S7 : S6    ;
     S7   :  ( data_in) ? next_state = S8 : S0    ;
-    S8   :  ( data_in) ? next_state = S9 : S1    ;
-    S9   :  ( data_in) ? next_state = S0 : S2    ;
+    S8   :  ( data_in) ? next_state = S9 : S2    ; //010 is done so expecting a 10 for overlapped case. Jump to S2
+    // In figure transition should be S8 --> S2 (0/0) !
+    S9   :  ( data_in) ? next_state = S0 : S2    ; //0110 is done so expecting a 10 for overlapped case. Jump to S2
 
 endcase
 
