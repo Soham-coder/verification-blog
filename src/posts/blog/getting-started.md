@@ -205,7 +205,7 @@ endclass: abc
 #### Question4
 ```md
 ---
-Q1: Suppose you are writing a TB for a memory model which has the following signals
+Q4: Suppose you are writing a TB for a memory model which has the following signals
 input wr_en = write_enable
 input rd_en = read_enable
 input addr = address
@@ -352,7 +352,7 @@ endfunction : sample_data_on_strb
 #### Question5
 ```md
 ---
-Q2: Explain the concept of polymorphism by code
+Q5: Explain the concept of polymorphism by code
 ```
 ```cpp
 class parent;
@@ -432,7 +432,7 @@ endmodule
 #### Stretch Question on above
 ```md
 ---
-Q2: If you declare the child method as also virtual what will happen
+Q5.1: If you declare the child method as also virtual what will happen
 ```
 ```
 Ans - Child methods are by default virtual even if they are not explicitly mentioned/declared provided the parent's method is virtual
@@ -442,7 +442,7 @@ So for all the cases i.e., 1,2,3 prints will remain the same
 #### Stretch Question on above
 ```md
 ---
-Q3: If you don't put virtual keyword in both child and parent what will happen
+Q5.2: If you don't put virtual keyword in both child and parent what will happen
 ```
 ```
 Now methods will be called solely depending on class type 
@@ -461,7 +461,7 @@ print2 - "this is child"
 #### Question6
 ```md
 ---
-Q2: Suppose you are given to code AXI master agent which will send aligned address in AWADDR. Code the basic sequence item and constraint 
+Q6: Suppose you are given to code AXI master agent which will send aligned address in AWADDR. Code the basic sequence item and constraint 
 needed for it which will be simulator/emulator friendly   
 ```
 ```cpp
@@ -504,7 +504,7 @@ endclass
 #### Question7(High level)
 ```md
 ---
-Q2: Suppose your AXI master is not sending burst aligned addresses for transfers. Provided you are given Burst zise and address how will you determine how many bytes it is unaligned to burst size   
+Q7: Suppose your AXI master is not sending burst aligned addresses for transfers. Provided you are given Burst zise and address how will you determine how many bytes it is unaligned to burst size   
 ```
 ```cpp
 
