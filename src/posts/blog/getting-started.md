@@ -494,12 +494,16 @@ constraint generate_burst_aligned_address{
 	burst_size_t === 32BYTE -> AWADDR[4:0] = 5'b0;//2**5 = 32
 	burst_size_t === 64BYTE -> AWADDR[5:0] = 6'b0;//2**6 = 64
 	burst_size_t === 128BYTE -> AWADDR[6:0] = 7'b0;//2**7 = 128
-};
+}
 
 constraint solver1 {solve burst_size_t before AWADDR};
 
 ....
 endclass
+```
+```
+You can solve the above by using modulo or (%) operator but when synthesized for running in emulation platform it will have more hardware cost.
+Also above method is beneficial in terms of software operation cost. 
 ```
 #### Question7(High level)
 ```md
@@ -544,6 +548,349 @@ return unaligned_offset;
 endfunction : unaligned_offset
 endpackage
 
+```
+```
+You can solve the above by using modulo or (%) operator but when synthesized for running in emulation platform it will have more hardware cost.
+Also above method is beneficial in terms of software operation cost. 
+```
+#### Question8
+```md
+---
+Q8: Which datatype in SV will you use while modelling a big (say.,512MB) RAM   
+```
+```
+When the size of the collection is unknown or the data space is sparse, 
+an associative array is used, which does not have any storage allocated 
+until it is used. That means, it is dynamically allocated, but has non-contiguous elements. 
+Associative array’s index expression is not restricted to integral expressions, but can be of any type.
+
+In RAM ,huge amount of data needs to be accessed , it's inefficient to declare the size in compile time,
+because many spaces may left unused, so it is declared as associative array
+```
+#### Question9
+```md
+---
+Q9: Which SV datatype does uvm_config_db uses to implement it's internal configuration database support 
+and type overriding of elements at runtime
+```
+```
+To build uvm_config_db we likely need a <key,value> pair lookup table is accessible from anywhere and with any index type.
+It should have static "set" and "get" methods. So let us use associative array datatype for implementing the same.
+"class_name :: set" & "class_name :: get" methods are used to store and retrieve information from database repectively.
+```
+```cpp
+//Rough implementation
+class uvm_config_db #(type T = int); //Type is dynamic, default type is integer
+
+//declare a static assoc-array
+static T db[string]; //return type of assoc-array is dynamic, default is int type
+//Why static because change of assoc-array by one method call will be visible to all 
+
+//define static "set" method
+static function void set(input string name, input T value); //set method takes the string index
+//and value to be stored in assoc-array(config_db) in that index
+db[name] = value;
+endfunction : set
+
+//define static "get" method
+static function void get(input string name, ref T value); //get method takes the string index 
+//and value to be obtained from assoc-array(config_db) from that index. value will be obtained as a reference/pointer
+value = db[name];
+endfunction : get
+
+//define utility print function
+static function void print();
+$display("config_db%s", $typename(T)); //print the type of return type of config_db
+
+foreach(db[i])
+$display("db[%s]=%p", i, db[i]); //print value, key
+
+endfunction : print
+
+endclass : uvm_config_db
+
+```
+```cpp
+//Let's use above config class
+
+class test;
+int i,j;
+endclass : test
+
+int i=2;
+int val;
+real pi=3.14
+
+//take handle of test class
+
+test test_inst;
+
+initial begin
+//call set method
+uvm_config_db#(int) :: set("i", i); 
+//Above will create following entry within config_db class
+//db["i"] =  2;
+
+uvm_config_db#(real) :: set("pi", pi);
+//Above will create following entry within config_db class
+//db["pi"] =  3.14;
+
+//take the instance of test class
+test_inst = new();
+
+test_inst.i = 8; //i=8 in test class instance
+test_inst.j = 6; //j=6 in test class instance
+
+uvm_config_db#(test) :: set("test_inst", test_inst);
+//Above will create following entry within config_db class
+//db["test_inst"] =  test_inst; // or pointer to test_inst
+
+uvm_config_db#(int) :: get("i", val);
+//Above will get the following entry value from within config_db class and return to user
+//val = db["i"] = 2;
+
+$display("get value of i from db is %0d", val); //will display 2
+
+uvm_config_db#(int) :: print();
+//Will print following display
+//config_dbint
+//db[i] = 2
+
+uvm_config_db#(real) :: print();
+//Will print following display
+//config_dbreal
+//db[pi] = 3.14
+
+uvm_config_db#(test) :: print();
+//Will print following display
+//config_dbtest
+//db[test_inst] = test_inst
+end
+```
+```cpp
+//Actual call to set and get methods in uvm are of the following format
+//set from topmost component
+string global_value = "soham";
+uvm_config_db #(string) :: set(null, "uvm_test_top.*", "string_key", global_value); 
+//Return 1- success or 0-failure
+//get in sub components
+string local_value;
+uvm_config_db #(string) :: get(this, "", "string_key", local_value); 
+```
+#### Question10
+```md
+Q10: What is the need for a virtual interface in System verilog?
+---
+```
+```md
+* System verilog interface is static in nature, wheras classes are dynamic in nature.Because of this reason , it is not allowed to declare the interface within classes but it is allowed to refer to or point to the interface.
+* A virtual interface is a variable of an interface type that is used in classes to provide access to physical interface signals.
+* Classes are dynamic and so created at run time, while interfaces are static which is created at compile time. So if you instantiate a physical interface within a class, it will throw compilation error.   
+```
+#### Question11
+```md
+Q11: Write a SV constraint to generate unique elements in an array (very popular but quite old question)
+```
+
+```cpp
+//Method 1
+class abc;
+
+rand bit[`DATA_WIDTH-1:0] data[];
+
+constraint unique_array_constraint 
+{ foreach(data[i])
+  foreach(data[j])
+  if(i!==j) 
+  data[i]!=data[j];
+}
+
+endclass:abc
+
+```
+```cpp
+//Method 2
+class abc;
+
+rand bit[`DATA_WIDTH-1:0] data[];
+
+constraint unique_array_constraint
+{
+	unique {data};
+}
+
+endclass:abc
+```
+```cpp
+//Method 3 - Though it is a solution it generates pseudo-random elements., i.e., 
+//predicatble to a certain extent. It is not true random
+class abc;
+
+rand bit[`DATA_WIDTH-1:0] data[];
+
+constraint unique_array_constraint
+{
+	foreach(data[i])
+	data[i] = i; //or i*i
+}
+
+function post_randomize();
+	data.shuffle();
+endfunction : post_randomize
+
+endclass:abc
+```
+
+#### Question11
+```md
+Q11: What can be basic verification sceanrios for a NOC with 2 masters accessing 4 slaves. NOC handles single protocol.
+---
+```
+
+```md
+* A bare minimum interconnect VIP should have master active/passive agents connected to the interface and slave IP components as DUT for different bus protocols.The active agents will drive transactions and passive agents will throw any error associated with protocol/timing. 
+* It should have a common interconnect/NOC scoreboard and a coverage monitor.
+* It should be able to handle multiple protocols
+* It should be able to handle setting different transaction attributes(like cacheable, bufferable, prot, priority etc.,) on each channel
+* It should be able to handle reconfigurable address mapping and routing on the fly by use of sempahores
+* It should have proper response code checking for
+	- Unmapped addresses
+	- Unsecured accesses to secured memories
+	- Transactions to a closed path (for power off or other reasons)
+	- Custom policy
+* It should be able to handle cache coherency
+	- Communication between coherent masters - An additional coherency scoreboard can be developed comprising of masters which access shared data.
+    This access should be properly communicated to all the concerned masters via coherency protocol and returned data must come from memory or cache
+	- Proper passing of shared data between coherent masters
+	- Accurate master ACE responses in regards to cache states
+```
+
+```md
+* Check single master accessing all slaves
+* Check multiple master trying to get access of bus at same time. Master 1 of higher priority(say) should take hold of bus and complete transaction. Immediately after it's completion, master 0 of lower priority(say) should finish it's transaction
+* Master should access non-existent slaves with unmapped address and check bus signal behaviour
+* Master should try to do both write and read in read only slave and check bus signal behaviour
+* ...
+
+```
+#### Question12
+```md
+Q12: How to know which master has initiated transaction or from which slave, data is coming from in case of multimaster and multislave scenario
+```
+
+```md
+As we know in AXI protocol, ID field is associated with an atomic transaction. So from transaction only, we will not be able to decipher which master has issued it or which slaves' response is it. We can put a ID associated with each master & slave in User signal of AXI in transaction for this. 
+```
+```cpp
+
+//master a monitor
+
+class master_a_mon extends uvm_monitor;
+
+transaction trans;
+
+uvm_analysis_port#(transaction) ap1;
+
+//new
+ap1 = new("ap1", this);
+
+//run_phase
+trans = transaction::type_id::create("trans",this);
+ap1.write(trans);
+
+...
+endclass: master_a_mon
+
+/*-------------------------------------------------
+---------------------------------------------------
+-------------------------------------------------*/
+
+//master b monitor
+class master_b_mon extends uvm_monitor;
+
+transaction trans;
+
+uvm_analysis_port#(transaction) ap2;
+
+//new
+ap2 = new("ap2", this);
+
+//run_phase
+trans = transaction::type_id::create("trans",this);
+ap2.write(trans);
+
+...
+endclass: master_b_mon
+```
+```cpp
+
+//scoreboard
+`uvm_analysis_imp_decl(_port_a)
+`uvm_analysis_imp_decl(_port_b)
+
+class scoreboard extends uvm_scoreboard;
+
+uvm_analysis_imp_port_a #(transaction, scoreboard) imp_a;
+uvm_analysis_imp_port_b #(transaction, scoreboard) imp_b;
+
+//Queues for respective masters
+transaction master_a[$];
+transaction master_b[$];
+
+int trans_cnt_mon_a;
+int trans_cnt_mon_b;
+
+//new
+imp_a = new("imp_a", this);
+imp_b = new("imp_b", this);
+
+virtual function void write_port_a(transaction trans);
+transaction sb_a;
+$cast( sb_a, trans.clone() );
+trans_cnt_mon_a++;
+
+case(sb_a.user)
+A:  begin
+    	master_a.push_back[sb_a]; 
+	end
+B:  begin
+    	master_b.push_back[sb_a];
+    end
+endcase
+endfunction
+
+virtual function void write_port_b(transaction trans);
+transaction sb_b;
+$cast( sb_b, trans.clone() );
+trans_cnt_mon_b++;
+
+case(sb_b.user)
+A:	begin
+		master_a.push_back(sb_b);
+  	end
+B:  begin
+	    master_b.push_back(sb_b);
+	end
+endcase
+endfunction
+
+endclass : scoreboard
+```
+
+```cpp
+//Environment
+class environment extends uvm_env;
+//instances
+
+//connect phase
+function void connect_phase(uvm_phase phase);
+
+master_a_mon.ap1.connect(scoreboard.imp_a);
+master_b_mon.ap2.connect(scoreboard.imp_b);
+
+endfunction
+...
+endclass
 ```
 
 
