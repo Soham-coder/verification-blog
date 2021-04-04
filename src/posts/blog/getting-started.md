@@ -1,5 +1,5 @@
 ---
-title: "SV questions"
+title: "System Verilog questions"
 category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "SV problem solving questions"
@@ -42,7 +42,7 @@ process process1, process2, process3;
 
 //initialise semaphore with 0 key
 function new();
-s = new(0);
+s = new(0); //initially with 0 keys
 endfunction:new
 
 task multiple_process();
@@ -64,7 +64,7 @@ s.put(1);
 end
 
 join_none
-s.get(2); //when you get 2 keys end execution
+s.get(2); //when you get 2 keys end execution by disabling threads
 disable_fork;
 s = null; //remove semaphore
 
@@ -117,7 +117,7 @@ endclass : abc
 Q2: There is a signal wdata[63:0] representing data-bus 
     There is a signal wstrb[7:0] representing strobe/valid byte of the data-bus
 
-When a valid byte is present in wdata, it has to be either 8'b11111111 or 8'b10101010
+Constraint is when a valid byte is present in wdata, it has to be either 8'b11111111 or 8'b10101010
 Write a SV code/constraint to generate suitable transactions
 ---
 ```
@@ -215,8 +215,7 @@ input valid = valid transaction on input side
 input wstrb = indicating which are valid byte lanes in wdata
 output rdata = read data
 
-Write the basic code (just the scratch template) for the sequence item and possible driving logic (write + read)
-and sampling function/logic for wdata on basis of wstrb which can be used in monitor
+Write the basic code (just the scratch template) for the sequence item and possible driving logic (write + read) and also the sampling function/logic for wdata on basis of wstrb which can be used in monitor
 ---
 ```
 ```cpp
@@ -435,7 +434,7 @@ endmodule
 Q5.1: If you declare the child method as also virtual what will happen
 ```
 ```
-Ans - Child methods are by default virtual even if they are not explicitly mentioned/declared provided the parent's method is virtual
+Ans - Child methods are by default virtual even if they are not explicitly mentioned/declared, provided the parent's method is virtual
 
 So for all the cases i.e., 1,2,3 prints will remain the same
 ```
@@ -450,7 +449,7 @@ If function/method names are same in parent and child, child method will overrid
 And even if a parent class is pointing to child instance 
 or a child handle is pointing to parent which in turn is pointing to child instance....none of that matters
 because when you will call the methods it will be called solely on class types i.e., 
-visibility of methods is limited to the type of class it is and not on the type of handle it is pointing to
+visibility of methods is limited to the type of class it is, and not on the type of handle it is pointing to
 
 So 
 For case 1,2,3:
@@ -461,8 +460,7 @@ print2 - "this is child"
 #### Question6
 ```md
 ---
-Q6: Suppose you are given to code AXI master agent which will send aligned address in AWADDR. Code the basic sequence item and constraint 
-needed for it which will be simulator/emulator friendly   
+Q6: Suppose you are given to code AXI master agent which will send aligned address in AWADDR according to AXI spec. Code the basic sequence item and constraint needed for it which will be simulator/emulator friendly   
 ```
 ```cpp
 class axi_sequence_item extends uvm_sequence_item;
@@ -508,7 +506,7 @@ Also above method is beneficial in terms of software operation cost.
 #### Question7(High level)
 ```md
 ---
-Q7: Suppose your AXI master is not sending burst aligned addresses for transfers. Provided you are given Burst zise and address how will you determine how many bytes it is unaligned to burst size   
+Q7: Suppose your AXI master is not sending burst aligned addresses for transfers. Provided you are given Burst size and address, how will you determine how many bytes it is unaligned to burst size.   
 ```
 ```cpp
 
@@ -565,7 +563,7 @@ until it is used. That means, it is dynamically allocated, but has non-contiguou
 Associative array’s index expression is not restricted to integral expressions, but can be of any type.
 
 In RAM ,huge amount of data needs to be accessed , it's inefficient to declare the size in compile time,
-because many spaces may left unused, so it is declared as associative array
+because many spaces may left unused, so it is good to declare as associative array
 ```
 #### Question9
 ```md
@@ -574,8 +572,8 @@ Q9: Which SV datatype does uvm_config_db uses to implement it's internal configu
 and type overriding of elements at runtime
 ```
 ```
-To build uvm_config_db we likely need a <key,value> pair lookup table is accessible from anywhere and with any index type.
-It should have static "set" and "get" methods. So let us use associative array datatype for implementing the same.
+To build uvm_config_db we likely need a <key,value> pair lookup table which is accessible from anywhere and with any index type.
+It should also have static "set" and "get" methods. So let us use associative array datatype for implementing the same.
 "class_name :: set" & "class_name :: get" methods are used to store and retrieve information from database repectively.
 ```
 ```cpp
@@ -584,7 +582,7 @@ class uvm_config_db #(type T = int); //Type is dynamic, default type is integer
 
 //declare a static assoc-array
 static T db[string]; //return type of assoc-array is dynamic, default is int type
-//Why static because change of assoc-array by one method call will be visible to all 
+//Why static, because change of assoc-array by one method call will be visible to all 
 
 //define static "set" method
 static function void set(input string name, input T value); //set method takes the string index
@@ -603,7 +601,7 @@ static function void print();
 $display("config_db%s", $typename(T)); //print the type of return type of config_db
 
 foreach(db[i])
-$display("db[%s]=%p", i, db[i]); //print value, key
+$display("db[%s]=%p", i, db[i]); //print key, value
 
 endfunction : print
 
@@ -616,7 +614,8 @@ endclass : uvm_config_db
 class test;
 int i,j;
 endclass : test
-
+//
+module abc;
 int i=2;
 int val;
 real pi=3.14
@@ -683,9 +682,9 @@ Q10: What is the need for a virtual interface in System verilog?
 ---
 ```
 ```md
-* System verilog interface is static in nature, wheras classes are dynamic in nature.Because of this reason , it is not allowed to declare the interface within classes but it is allowed to refer to or point to the interface.
+* System verilog interface is static in nature, wheras classes are dynamic in nature. Because of this reason, it is not allowed to declare the interface within classes but it is allowed to refer to or point to the interface.
 * A virtual interface is a variable of an interface type that is used in classes to provide access to physical interface signals.
-* Classes are dynamic and so created at run time, while interfaces are static which is created at compile time. So if you instantiate a physical interface within a class, it will throw compilation error.   
+* Classes are dynamic and so created at run time, while interfaces are static which is created at compile time. So if you instantiate a physical interface within a class, it will throw compilation error while compliation.   
 ```
 #### Question11
 ```md
@@ -743,13 +742,13 @@ endclass:abc
 
 #### Question11
 ```md
-Q11: What can be basic verification sceanrios for a NOC with 2 masters accessing 4 slaves. NOC handles single protocol.
+Q11: What can be basic verification scenarios for a NOC with 2 masters accessing 4 slaves. The NOC can handle single protocol.
 ---
 ```
 
 ```md
-* A bare minimum interconnect VIP should have master active/passive agents connected to the interface and slave IP components as DUT for different bus protocols.The active agents will drive transactions and passive agents will throw any error associated with protocol/timing. 
-* It should have a common interconnect/NOC scoreboard and a coverage monitor.
+* A bare minimum interconnect VIP should have master active/passive agents connected to the interface and slave IP components as DUT of different bus protocols. The active agents will drive transactions and passive agents will throw any error associated with protocol/timing 
+* It should have a common interconnect/NOC scoreboard and a coverage monitor
 * It should be able to handle multiple protocols
 * It should be able to handle setting different transaction attributes(like cacheable, bufferable, prot, priority etc.,) on each channel
 * It should be able to handle reconfigurable address mapping and routing on the fly by use of sempahores
@@ -766,8 +765,9 @@ Q11: What can be basic verification sceanrios for a NOC with 2 masters accessing
 ```
 
 ```md
+**Probable testcases**
 * Check single master accessing all slaves
-* Check multiple master trying to get access of bus at same time. Master 1 of higher priority(say) should take hold of bus and complete transaction. Immediately after it's completion, master 0 of lower priority(say) should finish it's transaction
+* Check multiple master trying to get access of bus at same time. Master 1 of higher priority(say) should take hold of bus first and complete transaction. Immediately after it's completion, master 0 of lower priority(say) should finish it's transaction
 * Master should access non-existent slaves with unmapped address and check bus signal behaviour
 * Master should try to do both write and read in read only slave and check bus signal behaviour
 * ...
@@ -775,11 +775,11 @@ Q11: What can be basic verification sceanrios for a NOC with 2 masters accessing
 ```
 #### Question12
 ```md
-Q12: How to know which master has initiated transaction or from which slave, data is coming from in case of multimaster and multislave scenario
+Q12: How to know which master has initiated transaction to or from which slave transaction is coming from, in case of a multimaster and multislave scenario
 ```
 
 ```md
-As we know in AXI protocol, ID field is associated with an atomic transaction. So from transaction only, we will not be able to decipher which master has issued it or which slaves' response is it. We can put a ID associated with each master & slave in User signal of AXI in transaction for this. 
+As we know in AXI, ID field is associated with an atomic transaction. So from transaction only, we will not be able to decipher which master has issued it or which slaves' response is it. We can put a ID associated with each master & slave in User signal of AXI in transaction for this. 
 ```
 ```cpp
 
@@ -892,5 +892,185 @@ endfunction
 ...
 endclass
 ```
+```
+
+```
+#### Question13
+```md
+Q13: What is the difference between m_sequencer and p_sequencer 
+```
+```md
+* m_sequencer is default sequencer and p_sequencer is typecast to m_sequencer
+* m_sequencer is a handle of type uvm_sequencer_base which is available by default in a sequence
+  - It is determined by the following-
+    - the sequencer handle provided in the start method
+	- the sequencer used by the parent sequence
+    - the sequencer that was set using the set_sequencer method
+* The real sequencer on which a sequence is running would normally be derived from the uvm_sequencer_base class. Hence to access the real sequencer on which sequence is running , you would need to typecast the m_sequencer to the physical sequencer which is generally called p_sequencer
+* Since p_sequencer is a typed-specific sequencer pointer, it is generally created by registering the sequence to the sequencer using macro (`uvm_declare_p_sequencer). The p_sequencer is used to access the sequencer properties.
+```
+```cpp
+//An example
+//Let's say a sequence wants to access a component(monitor_a., say) which is available with its' sequencer
+
+class sequencer_c extends uvm_sequencer;
+
+	monitor_a monitor_a_inst1;
+endclass : sequencer_c
+```
+```cpp
+class sequence_c extends uvm_sequence
+
+	sequencer_c p_sequencer;
+	//or
+	`uvm_declare_p_sequencer(sequencer_c)
+
+	monitor_a monitor_a_inst2;
+
+	task pre_body();
+
+	//Typecast the m_sequencer base type to p_sequencer
+
+	if( !$cast(p_sequencer, m_sequencer) ) 
+	begin
+		`uvm_error("sequence_c:","Sequencer type mismatch ... cast failed")
+	end
+
+	//Now you can access after typecasting
+
+	monitor_a_inst2 = p_sequencer.monitor_a_inst1;
+
+	endtask : pre_body
+
+endclass: sequence_c
+```
+```
+#### Question14
+```md
+Q14: What is the difference between virtual sequencer and a normal sequencer 
+```
+```
+Virtual sequencer contains pointers to real physical sequencers where sequences can run upon. It is not bothered with data driving part. It does not communicate with real physical drivers. It's job is only to have the handles of child sequencers and point them to actual physical sequencers of agents respectively.
+```
+#### Stretch Question on above
+```md
+Q14: What is the use of virtual sequencer in your SoC Testbench 
+```
+```md
+* It contains handles of the sequencers which are located in different agents
+* If stimulus generation across different interfaces has to be synchronized, it is done by Virtual sequencer and virtual sequences
+* In practical if you have two IPs in an SoC and you want to have stimulus control, virtual sequencer, virtual sequences helps to achieve it
+```
+```cpp
+//Consider seqr1 and seqr2 are handles of seqrs which belongs to agents seq1_agent and seq2_agent respectively within environment "env"
+class v_seqr extends uvm_sequencer;
+`uvm_component_utils(v_seqr)
+
+//Handles of seqrs
+type1_seqr seqr1;
+type2_seqr seqr2;
+
+//constructor
+function new(string name="v_seqr", uvm_component parent);
+super.new(name,parent);
+endfunction:new
+
+endclass:v_seqr
+
+```
+```cpp
+//Instantiate v_seqr within virtual sequence "virtual_base_seq"
+
+class base_virtual_seq extends uvm_sequence#(uvm_sequence_item);
+
+`uvm_object_utils(base_virtual_seq)
+
+type1_seqr seqr1;
+type2_seqr seqr2;
+
+v_seqr v_seqr_inst;
+//or you can use `uvm_declare_p_sequencer macro
+
+//constructor
+function new(string name="base_virtual_seq");
+super.new(name);
+endfunction:new
+
+task body();
+if(!$cast(v_seqr_inst, m_sequencer)) begin
+`uvm_error(get_full_name(), "v_seqr pointer cast failed")
+end
+//After casting assign the null pointers to actual child sequencers 
+this.seqr1 = v_seqr.seqr1;
+this.seqr2 = v_seqr.seqr2;
+
+endtask:body
+
+endclass:base_virtual_seq
+```
+```cpp
+//Let's define virtual sequence
+
+class v_seq extends base_virtual_seq;
+`uvm_object_utils(v_seq)
+
+type1_seqr seqr1;
+type2_seqr seqr2;
+//virtual sequencer handle
+v_seqr v_seqr_inst;
+
+//constructor
+function new(string name="v_seq");
+super.new(name);
+endfunction:new
+
+task body();
+
+//call parent body to assign sub_sequence handles correctly
+super.body();
+
+//take handles of actual sequences
+//for time being, assume there are sequence classes of below names
+type1_seq seq1;
+type2_seq seq2;
+
+//create seqs
+seq1 = type1_seq::type_id::create("seq1");
+seq2 = type2_seq::type_id::create("seq2");
+
+//start the sequences
+repeat(10)begin
+seq1.start();
+seq2.start();
+end
+endtask:body
+
+endclass:v_seq
+```
+```cpp
+//Environment will contain v_seqr, agents, and make connection of v_seqr to actual agent seqrs
+
+...
+function void connect_phase(uvm_phase phase);
+v_seqr.seqr1 = seq1_agent.m_sequencer;
+v_seqr.seqr2 = seq2_agent.m_sequencer;
+endfunction:connect_phase
+...
+```
+```cpp
+//Test will contain v_seq and env
+...
+virtual task run_phase(uvm_phase phase);
+//create v_seq
+v_seq_inst = v_seq::type_id::create("v_seq");
+phase.raise_objection(this);
+//start v_seq on v_seqr
+v_seq_inst.start(env.v_seqr_inst);
+phase.drop_objection(this);
+
+endtask:run_phase
+...
+```
+
 
 

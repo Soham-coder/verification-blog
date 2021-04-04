@@ -1,5 +1,5 @@
 ---
-title: "Verilog common questions"
+title: "Verilog questions"
 category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Famous verilog questions"
@@ -24,7 +24,7 @@ output b;
 reg c;
 always_ff@(posedge clk)
 begin
- c = a; //LHS will be evaluated in active region and RHS will be updated in active region. So c will get value a as well as b will also get value c sequentially but change of values will be reflected then and there in active region only. Their values will get reflected if printed by system task $display or $strobe. It will synthesize to only 1 flip-flop with a as input and b=c as output wire with "clk" as clock of the flip-flop
+ c = a; //RHS will be evaluated in active region and LHS will be updated in active region. So c will get value a as well as b will also get value c sequentially but change of values will be reflected then and there in active region only. Their values will get reflected if printed by system task $display or $strobe. It will synthesize to only 1 flip-flop with a as input and b=c as output wire with "clk" as clock of the flip-flop
  b = c;
 end
 endmodule
@@ -42,7 +42,7 @@ output b;
 reg c;
 always_ff@(posedge clk)
 begin
- c <= a;//LHS will be evaluated in active region and RHS will be updated in NBA region. So c will get value of a, and b will get value of c
+ c <= a;//RHS will be evaluated in active region and LHS will be updated in NBA region. So c will get value of a, and b will get value of c
  //Their values will be reflected if they are printed by system task $strobe which occurs at the NBA region. 
  //It will synthesize to 2 f/fs - 1st flop with i/p as a and o/p as c
  //2nd flop with i/p as c and o/p as b, both clocked by the same clock "clk"
@@ -52,7 +52,7 @@ end
 endmodule
 ```
 ```
-In second case, old value of c is sampled before the new value is reflected in each cycle. Hence value of a reflects to c only in 2 cycles, resulting in two flip-flops.
+In second case, old value of c is sampled before the new value is reflected in each cycle. Hence value of a reflects to b only in 2 cycles, resulting in two flip-flops.
 ```
 ```cpp
 //Example2
@@ -72,7 +72,7 @@ end
 ```
 In this example, each statement uses blocking assignments and the values of a and b are evaluated and assigned to x and y immediately as the statements execute in order. Hence, in third statement, the new values of x and y are evaluated and assigned to z.
 
-Thus blocking statement are executed in the Active region of Verilog Stratified Event Queue.
+Thus blocking statement are executed in the active region of Verilog Stratified Event Queue.
 ```
 ```cpp
 //Example2
@@ -91,9 +91,9 @@ end
 endmodule
 ```
 ```
-In nonblocking assignments, all assignments are deferred until end of current simulation tick. Hence, evaluation of entire RHS (Right Hand Side) happens first and only then assignment to LHS happens.
+In nonblocking assignments, all assignments are deferred until end of current simulation tick. Hence, evaluation of entire RHS (Right hand side) happens first and only then assignment to LHS happens.
 
-In this example, the RHS of each of the three statements are evaluated first and only after that the assignments to each of LHS (left hand side) happens. Hence, you can notice that in this case, the old values of x and y are OR’ed and assigned to z.
+In this example, the RHS of each of the three statements are evaluated first and only after that the assignments to each of LHS (Left hand side) happens. Hence, you can notice that in this case, the old values of x and y are OR’ed and assigned to z.
 
 Thus evaluation of RHS of Nonblocking statement occurred in Active Region and updation of LHS side happen in NBA region.
 ```
@@ -106,10 +106,8 @@ Q2: Frequency divider or clock divider by 2
 ```md
 For the circuit-
 
-We have a flip-flop with input d and output q and ~q clocked by clock "clk"
-//The input clk needs to be divided by 2 
-//So if you connect output ~q with input d then the normal output q 
-//will act as your divided_by_2 clock
+We make a flip-flop with input d and output q and ~q clocked by clock "clk"
+The input clk needs to be divided by 2 , So if you connect output ~q with input d then the normal output q will act as your divided_by_2 clock
 ```
 ```cpp
 module freq_divider_by_2(rst, clk, clk_by_2);
@@ -136,13 +134,13 @@ endmodule
 ---
 Q3: Draw a state machine for a sequence detector which can detect the pattern 1010 [01*] 0111
 
-[01*] means that any number of 0s followed by any number of 1s
+Here [01*] means that any number of 0s followed by any number of 1s
 eg., 00..1, 0111.., 01, 001, 011, 1, 1.., 11 etc., 
 ---
 ```
 ```md
 *Disclaimer- I have not faced this type of question before where sequence can be multiple combinations - So please do point out if you see any flaw or states that have not been considered*
-*Error Note- In figure transition should be S8 --> S2 (0/0) !!!*
+*Error Note- In figure below, transition should be from S8 to --> S2 (0/0) !!!*
 ```
 
 
@@ -204,7 +202,7 @@ begin//
 
 next_state = current_state; //default is to stay in current state
 
-unique_case (current_state)
+unique_case (current_state) //Unique case is recommended so as to not infer nested MUX in synthesis
     
     IDLE :  ( data_in) ? next_state = S0 : IDLE  ;
     
@@ -218,9 +216,8 @@ unique_case (current_state)
     
     S6   :  (!data_in) ? next_state = S7 : S6    ;
     S7   :  ( data_in) ? next_state = S8 : S0    ;
-    S8   :  ( data_in) ? next_state = S9 : S2    ; //010 is done so expecting a 10 for overlapped case. Jump to S2
-    // In figure transition should be S8 --> S2 (0/0) !
-    S9   :  ( data_in) ? next_state = S0 : S2    ; //0110 is done so expecting a 10 for overlapped case. Jump to S2
+    S8   :  ( data_in) ? next_state = S9 : S2    ; //010 is encountered upto this, so expecting a 10 for overlapped case. Jump to S2 --> In figure transition should be S8 --> S2 (0/0) !
+    S9   :  ( data_in) ? next_state = S0 : S2    ; //0110 is encountered upto this, so expecting a 10 for overlapped case. Jump to S2
 
 endcase
 
@@ -233,3 +230,17 @@ endmodule
 
 
 ```
+
+```md
+---
+Q4: Why there is no XNAND or XAND gates when there is XNOR or XOR gates
+
+**Disclaimer-This is the most weirdest question I have faced. I seriously don't know the answer, don't also want to know. If you find the right answer, ping me the answer. For now I am giving the answer which I found in the internet 
+---
+```
+```md
+XOR is synonymous to XNAND
+XNOR is synomymous to XAND
+So they are redundant as is this question :)
+```
+
