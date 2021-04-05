@@ -13,7 +13,7 @@ alt: "markdown logo"
 #### Question 
 ```md
 ---
-Q4: Develop a driver for the following sceanario(write basic idea code for the drive task only)
+Q4: Develop a driver for the following scenario(write basic idea code for the drive task only)
 
 Transaction have addr and data fields
 Timing diagram is similar as below - pipelined data and addresses
@@ -30,7 +30,7 @@ class driver extends uvm_driver#(transaction);
 
 ...
 
-task run_phase(uvm_phase phase);
+virtual task run_phase(uvm_phase phase);
 
 fork
 pipelined_drive_items();
@@ -50,7 +50,7 @@ transaction current_tr_q[$]; //take a queue to maintain current tr
 
 virtual void task automatic pipelined_drive_items();
 
-transaction tr;
+transaction req;
 
 forever begin
 seq_item_port.get(req);
@@ -66,10 +66,10 @@ end
 endtask : pipelined_drive_items
 
 //Semaphore is used to maintain so that no more than 1 transaction enters each pipe stage i.e., addr and data
-task addr_phase();
+task addr_phase(transaction req);
 //begin addr phase
 @(posedge vif.clk);
-vif.addr <= tr.addr;
+vif.addr <= req.addr;
 lock.get(1); //get a key at start of data phase .i.e., lock the pipeline
 -> data_phase_starting; //trigger event to start data_phase and immediately return back to seq_item_port get method without blocking and bring another req
 endtask : addr_phase
@@ -78,7 +78,7 @@ endtask : addr_phase
 always begin //always executing
 @(data_phase_starting);
 repeat(5)@(posedge vif.clk);
-vif.data <= tr.data;
+vif.data <= req.data;
 transaction rsp = current_tr_queue.pop_front();
 rsp.copy(req);
 seq_item_port.put(rsp);
@@ -102,7 +102,7 @@ mbox addr_mbox;
 mbox data_mbox
 transaction tr;
 
-task run_phase(uvm_phase phase);
+virtual task run_phase(uvm_phase phase);
 
 fork 
 addr();
@@ -139,6 +139,55 @@ end
 endtask:data
 
 endclass: driver
+```
+
+```cpp
+//In case if you are not able to give any of these solutions accurately, below may also work depending on interviewer which is similar or close to actual solution
+
+class driver extends uvm_driver#(transaction);
+
+...
+event data_phase_start;
+transaction current_req[$];
+
+virtual task run_phase();
+forever begin
+
+seq_item_port.get_next_item(req);
+
+drive_items(req);
+
+seq_item_port.item_done();
+
+end
+endtask: run_phase
+
+void task drive_items(req);
+
+fork
+addr_phase(req);
+data_phase(req);
+join_none //It will immediately get out and call item_done() and get next sequence_item
+
+void task addr_phase(transaction req);
+
+@(posedge vif.clk);
+vif.addr <= req.addr;
+current_req.push_back(req);
+-> data_phase_start;
+endtask: addr_phase
+
+void task data_phase(transaction req);
+@(data_phase_start.triggered);
+current_req.pop_front(req);
+repeat(5)@(posedge vif.clk);
+vif.data <= req.data;
+endtask: data_phase
+
+endclass:driver
+
+//But this solution still have possibilty of having more than 1 txs in 1 phase. So add semaphores and lock pipe before starting data phase
+//and release pipe after finishing data phase as solution 1 
 ```
 
 

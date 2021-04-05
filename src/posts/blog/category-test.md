@@ -30,7 +30,7 @@ end
 endmodule
 ```
 ```
-In first case, blocking assignments are used and hence the value of a will be assigned to c and the new value will be reflected onto b in same cycle and hence the variable c and b results in a wire. So, only one flip flow will be needed.
+In first case, blocking assignments are used and hence the value of a will be assigned to c and the new value will be reflected onto b in same cycle and hence the variable c and b results in a wire. So, only one flip flop will be needed.
 ```
 ```cpp
 //Example1
@@ -232,15 +232,16 @@ endmodule
 ```
 
 ```md
----
+
 Q4: Why there is no XNAND or XAND gates when there is XNOR or XOR gates
 
-**Disclaimer-This is the most weirdest question I have faced. I seriously don't know the answer, don't also want to know. If you find the right answer, ping me the answer. For now I am giving the answer which I found in the internet 
----
+**Disclaimer-This is the one of the weirdest question I have faced ever. I seriously don't know the answer, and also don't want to know. Though if you find the right answer, ping me the answer. For now I am giving the answer which I found in the internet** 
+
 ```
 ```md
 XOR is synonymous to XNAND
 XNOR is synomymous to XAND
-So they are redundant as is this question :)
+
+So these gates are redundant as is this question :)
 ```
 

@@ -665,6 +665,8 @@ uvm_config_db#(test) :: print();
 //config_dbtest
 //db[test_inst] = test_inst
 end
+
+endmodule:abc
 ```
 ```cpp
 //Actual call to set and get methods in uvm are of the following format
@@ -684,7 +686,7 @@ Q10: What is the need for a virtual interface in System verilog?
 ```md
 * System verilog interface is static in nature, wheras classes are dynamic in nature. Because of this reason, it is not allowed to declare the interface within classes but it is allowed to refer to or point to the interface.
 * A virtual interface is a variable of an interface type that is used in classes to provide access to physical interface signals.
-* Classes are dynamic and so created at run time, while interfaces are static which is created at compile time. So if you instantiate a physical interface within a class, it will throw compilation error while compliation.   
+* Classes are dynamic and so created at run time, while interfaces are static which is created at compile time. So if you instantiate a physical interface within a class, it will throw compilation error while compilation.   
 ```
 #### Question11
 ```md
@@ -758,8 +760,7 @@ Q11: What can be basic verification scenarios for a NOC with 2 masters accessing
 	- Transactions to a closed path (for power off or other reasons)
 	- Custom policy
 * It should be able to handle cache coherency
-	- Communication between coherent masters - An additional coherency scoreboard can be developed comprising of masters which access shared data.
-    This access should be properly communicated to all the concerned masters via coherency protocol and returned data must come from memory or cache
+	- Communication between coherent masters - An additional coherency scoreboard can be developed comprising of masters which access shared data.This access should be properly communicated to all the concerned masters via coherency protocol and returned data must come from memory or cache
 	- Proper passing of shared data between coherent masters
 	- Accurate master ACE responses in regards to cache states
 ```
@@ -902,10 +903,10 @@ Q13: What is the difference between m_sequencer and p_sequencer
 ```md
 * m_sequencer is default sequencer and p_sequencer is typecast to m_sequencer
 * m_sequencer is a handle of type uvm_sequencer_base which is available by default in a sequence
-  - It is determined by the following-
-    - the sequencer handle provided in the start method
+    It is determined by the following:
+	- the sequencer handle provided in the start method
 	- the sequencer used by the parent sequence
-    - the sequencer that was set using the set_sequencer method
+	- the sequencer that was set using the set_sequencer method
 * The real sequencer on which a sequence is running would normally be derived from the uvm_sequencer_base class. Hence to access the real sequencer on which sequence is running , you would need to typecast the m_sequencer to the physical sequencer which is generally called p_sequencer
 * Since p_sequencer is a typed-specific sequencer pointer, it is generally created by registering the sequence to the sequencer using macro (`uvm_declare_p_sequencer). The p_sequencer is used to access the sequencer properties.
 ```
@@ -944,11 +945,15 @@ class sequence_c extends uvm_sequence
 
 endclass: sequence_c
 ```
-```
+
 #### Question14
+
 ```md
 Q14: What is the difference between virtual sequencer and a normal sequencer 
+
 ```
+
+
 ```
 Virtual sequencer contains pointers to real physical sequencers where sequences can run upon. It is not bothered with data driving part. It does not communicate with real physical drivers. It's job is only to have the handles of child sequencers and point them to actual physical sequencers of agents respectively.
 ```
@@ -1000,7 +1005,7 @@ task body();
 if(!$cast(v_seqr_inst, m_sequencer)) begin
 `uvm_error(get_full_name(), "v_seqr pointer cast failed")
 end
-//After casting assign the null pointers to actual child sequencers 
+//After casting assign the null pointers to actual child sequencers pointers present inside v_seqr
 this.seqr1 = v_seqr.seqr1;
 this.seqr2 = v_seqr.seqr2;
 
@@ -1040,8 +1045,8 @@ seq2 = type2_seq::type_id::create("seq2");
 
 //start the sequences
 repeat(10)begin
-seq1.start();
-seq2.start();
+seq1.start(seqr1);
+seq2.start(seqr2);
 end
 endtask:body
 
@@ -1073,4 +1078,52 @@ endtask:run_phase
 ```
 
 
+#### Question15
+```md
+Q15: What is the difference between a reg, logic in SystemVerilog
+```
+```
+* A reg is a data type that can model a storage element or a state. They can be synthesized to FF, latch or combinational circuit (They might not be synthesizable !!!) 
+* They need to be driven by an always block and cannot be driven by continuous assignment statement. 
 
+Eg.,
+module abc(clk,in,a);
+input clk;
+input in;
+reg a;
+
+always_ff@(posedge clk);
+begin
+a <= in; //allowed
+end
+
+assign a = in; //not allowed
+endmodule:abc
+//////
+
+*Logic can be both driven by assign block, output of a port and inside a procedural block like this
+
+//Eg.,
+logic a;
+assign a = b ^ c; // wire style
+always (c or d) a = c + d; // reg style
+MyModule module(.out(a), .in(xyz)); // wire style
+//////
+
+* A reg can be used to model both sequential and combinational logic.
+
+```
+```
+* A logic is a new data type in SystemVerilog that can be used to model both wires and state information (reg). 
+* It also is a 4 state variable like reg and hence can hold 0, 1, x and z values. 
+* If a wire is declared as a logic (wire logic), then it can be used to model multiple drivers and the last assignment will take the value.
+* So, Logic data type doesn’t permit multiple driver. It has a last assignment win behavior in case of multiple assignment (which implies it has no hardware equivalence). Reg/Wire data type give X if multiple driver try to drive them with different value. Logic data type simply assign the last assignment value.
+```
+
+```md
+Q16: What is the difference between a bit and logic data type?
+```
+```
+* bit is a 2-state data type that can take only values 0 and 1, while logic is a 4-state data type which can take values 0, 1, x, and z. 
+* 2-state variables will help in a small simulation speed up but should not be used if it is used to drive or sample signals from RTL design in which uninitialized and unknown values will be missed.
+```

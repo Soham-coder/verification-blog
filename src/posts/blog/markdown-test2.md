@@ -24,9 +24,9 @@ Q2: Develop a verification plan for the following arbiter
 Above diagram shows the block diagram of an arbiter that controls 2 requesting agents and generates 2 grants to each of the agent in a round robin order. 
 
 **Specification**
-Assume that each of the requesting agent can assert the request signal (Req 0/1) independently and will hold it asserted until the arbiter gives them grant for a pulse. The arbitration order is Req0 followed by 1 in a round robin fashion. Given that there are 2 requesting agents, each of them should get a grant at least one in 2 cycles. This also means that if a request is asserted, the grant signal for that agent should be assigned in a maximum of 2 cycles. 
+Assume that each of the requesting agent can assert the request signal (Req 0/1) independently and will hold it asserted until the arbiter gives them grant for a pulse. The arbitration order is Req0 followed by 1 in a round robin fashion. Given that there are 2 requesting agents, each of them should get a grant at least once in 2 cycles. This also means that if a request is asserted, the grant signal for that agent should be assigned in a maximum of 2 cycles. 
 ```
-```cpp
+```
 Following things can be verified with assertion-
 
 1) In any cycle, there can be only one grant signal that can be asserted.
@@ -87,22 +87,30 @@ req0_b2b_chk : assert property (req0_b2b);
 
 //Similarly for req1 ....
 ```
+
 #### Stretch question on above
+
 ```md
 ---
-Q2.2: Write a checker to check that if request is asserted, then grant should be asserted in the next clock or in the next to next clock (2 cycle window)
+Q2.2 Write a checker to check that if request is asserted, then grant should be asserted in the next clock or in the next to next clock (2 cycle window)
 ---
 ```
+
 ```cpp
-property req_followed_by_grant;
-	@(posedge clk)
-		req0 |-> ##[1:2]grant0;
-endproperty
+property req0_followed_by_grant0;
+	@(posedge clk) req0 |-> ##[1:2]grant0 ;
+endproperty: req0_followed_by_grant0
 
-chk : assert property(req_followed_by_grant);
+chk0 : assert property (req0_followed_by_grant0);
 
-//same for req1
+
+property req1_followed_by_grant1;
+	@(posedge clk) req1 |-> ##[1:2]grant1 ;
+endproperty: req1_followed_by_grant1
+
+chk1 : assert property (req1_followed_by_grant1);
 ```
+
 #### Question 3
 ```md
 ---
