@@ -3,7 +3,7 @@ title: "Development of a pipelined driver"
 category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Development of a pipelined driver"
-thumbnail: "./images/markdown-test/thumbnail.jpg"
+thumbnail: "./images/markdown-test1/thumbnail.jpg"
 alt: "markdown logo"
 ---
 

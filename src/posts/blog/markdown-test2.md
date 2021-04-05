@@ -3,7 +3,7 @@ title: "Verification plan of a simple arbiter"
 category: "Questions"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Verification plan of a simple arbiter"
-thumbnail: "./images/markdown-test/arbiter.jpg"
+thumbnail: "./images/markdown-test2/arbiter.jpg"
 alt: "markdown logo"
 ---
 
@@ -17,7 +17,7 @@ Q2: Develop a verification plan for the following arbiter
 ---
 ```
 #### Arbiter
-![simple_arbiter](./images/markdown-test/arbiter.jpg)
+![simple_arbiter](./images/markdown-test2/arbiter.jpg)
 
 ```md
 **Description**
