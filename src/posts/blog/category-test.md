@@ -407,7 +407,8 @@ end//
 ```
 ```cpp
 //Without using temporary variable leveraging non-blocking operation in verilog
-//Below works but will require 2 clocks for every swap operation
+
+//In first clock, swap happens provided a, b are initialised to desired values, in the next clock it becomes same again
 
 reg clk;
 reg [3:0] a;
