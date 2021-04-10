@@ -1,6 +1,6 @@
 ---
 title: "Verilog questions"
-category: "Questions"
+category: "Verilog"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Famous verilog questions"
 thumbnail: "./images/default.jpg"
@@ -235,13 +235,187 @@ endmodule
 
 Q4: Why there is no XNAND or XAND gates when there is XNOR or XOR gates
 
-**Disclaimer-This is the one of the weirdest question I have faced ever. I seriously don't know the answer, and also don't want to know. Though if you find the right answer, ping me the answer. For now I am giving the answer which I found in the internet** 
+**Disclaimer-This is the one of the weirdest question I have faced ever. I seriously don't know the answer, and also don't want to know. Though if you find the right answer, ping me the answer. For now I am giving the answer which I found on the internet** 
 
 ```
 ```md
 XOR is synonymous to XNAND
 XNOR is synomymous to XAND
 
-So these gates are redundant as is this question :)
+So XNAND and XAND gates are redundant as is this question :)
+```
+```md
+---
+Q5: Write a FSM to detect a binary number which is divisible by 5 and also extract a general mathematical equation to generate the next state
+--- 
+```
+```md
+**General Solution-**
+- A general algorithm to create an FSM to check divisibility by a number N is as follows:
+1) Create N states and number them from 0 to N-1. The number on the state denotes the remainder of a number when divided by N i.e., a (mod N) where a is the number
+2) For each state i, there are two arrows going out: one for 0, the other for 1. The arrow for 0 goes to state 2i (mod N), and that for 1 goes to 2i + 1 (mod N).
+i.e., Qi -> Q(2*i + transition) mod N, where transition can be inside {0,1}
+
+```
+```md
+Now coming to our solution
+N = 5
+So, We will have states Q0, Q1, Q2, Q3, Q4
+States |  Description
+Q0    -> remainder is 0 when divided by 5 (this will be our starting and desired finishing state)
+Q1    -> remainder is 1 when divided by 5
+Q2    -> remainder is 2 when divided by 5
+Q3    -> remainder is 3 when divided by 5
+Q4    -> remainder is 4 when divided by 5
+
+Now coming to the transitions
+
+- When in state Q0, 
+if we encounter a 0, goto 0*2(mod 5) i.e., Q0
+if we encounter a 1, goto 0*2+1(mod 5) i.e., Q1
+
+- When in state Q1,
+if we encounter a 0, goto 1*2(mod 5) i.e., Q2
+else if we encounter a 1, goto 1*2+1(mod 5) i.e., Q3
+
+- When in state Q2,
+if we encounter a 0, goto 2*2(mod 5) i.e., Q4
+else if we encounter a 1, goto 2*2+1(mod 5) = 5(mod 5) = 0(mod 5) i.e., Q0
+
+- When in state Q3,
+if we encounter a 0, goto 2*3(mod 5) = 6(mod 5) = 1(mod 5) i.e., Q1
+else if we envounter a 1, goto 2*3+1(mod 5) = 7(mod 5) = 2(mod 5) i.e., Q2
+
+- When in state Q4,
+if we encounter a 0, goto 2*4(mod 5) = 8(mod 5) = 3(mod 5) i.e., Q3
+else if we encounter a 1, goto 2*4+1(mod 5) = 9(mod 5) = 4(mod 5) i.e., Q4
+
+Now the outputs corresponding to all the states is 0 except Q0.
+
+So we want a transition that starts from Q0 and ends at Q0 
+
+```
+#### State Diagram
+![State Diagram](./images/category-test/div_by_five_fsm.jpg)
+
+```
+The doubled circled state is the one having output as 1
+
+Let’s take 5 for example. Its binary representation is 101. Following the graph, you can tell 101 goes through the path q0 → q1 → q2 → q0. It starts from q0 and ends in q0, and indeed 5 is divisible by 5!
+
+You can check for others...
 ```
 
+```cpp
+module div_by_5_det_mealy
+(
+    clk,
+    reset,
+    data_in,
+    data_out
+);
+
+input clk;
+input reset;
+input data_in;
+output data_out;
+
+typedef enum logic[2:0]
+{   
+    IDLE = 0,
+    S0 = 1,
+    S1 = 2,
+    S2 = 3,
+    S3 = 4
+}
+state_t;
+
+(* fsm_encoding = "grey" *) state_t current_state;
+(* fsm_encoding = "grey" *) state_t next_state;
+
+//Automatically synthesis tool will encode states into optimized grey encoding format
+
+//Current state logic (sequential)
+
+always_ff@(posedge clk, posedge reset)
+begin//
+if(reset)
+    current_state <= IDLE;
+else
+    current_state <= next_state;
+end//
+
+//Next state logic (combinational)
+
+always_comb
+
+begin//
+
+next_state = current_state; //default is to stay in current state
+
+unique_case(current_state)
+
+    IDLE : ( data_in) ? next_state = S0 : IDLE;
+
+    S0   : (!data_in) ? next_state = S0 : S1;
+    S1   : (!data_in) ? next_state = S2 : S3;
+    S2   : (!data_in) ? next_state = S4 : S0;
+    S3   : (!data_in) ? next_state = S1 : S2;
+    S4   : (!data_in) ? next_state = S3 : S4;
+
+endcase
+
+end//
+
+//Output assignment
+
+assign data_out = (current_state == S0) ? 1 : 0;
+
+endmodule
+```
+
+```md
+Q6: Write a verilog code to swap contents of 2 registers
+```
+```cpp
+//Using temporary variable
+
+reg clk;
+reg [3:0] temp;
+reg [3:0] a;
+reg [3:0] b;
+
+always_ff@(posedge clk)
+begin//
+temp = b;
+b = a;
+a = temp;
+end//
+```
+```cpp
+//Without using temporary variable
+reg clk;
+reg [3:0] a;
+reg [3:0] b;
+
+always_ff@(posedge clk)
+begin//
+a = a^b;
+b = a^b;
+a = a^b;
+end//
+```
+```cpp
+//Without using temporary variable leveraging non-blocking operation in verilog
+//Below works but will require 2 clocks for every swap operation
+
+reg clk;
+reg [3:0] a;
+reg [3:0] b;
+
+always_ff@(posedge clk)
+begin//
+a <= b;
+b <= a;
+end//
+```

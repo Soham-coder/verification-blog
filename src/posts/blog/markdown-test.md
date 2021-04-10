@@ -1,6 +1,6 @@
 ---
 title: "FIFO UVC Development"
-category: "Questions"
+category: "Verification"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "UVM based UVC development of a synchronous FIFO"
 thumbnail: "./images/markdown-test/scoreboard.png"

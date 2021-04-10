@@ -1,6 +1,6 @@
 ---
 title: "FIFO depth calculation and testplan"
-category: "Questions"
+category: "Verification"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "FIFO depth calculation and testplan"
 thumbnail: "./images/markdown-test3/scoreboard.png"

@@ -1,6 +1,6 @@
 ---
 title: "Verification plan of a simple arbiter"
-category: "Questions"
+category: "Verification"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "Verification plan of a simple arbiter"
 thumbnail: "./images/markdown-test2/arbiter.jpg"
@@ -146,6 +146,48 @@ property p_c;
    |-> ##1 valid; //because valid can get deasserted only after ready comes
 endproperty
 p_c_chk: assert property (p_c);
+```
+
+#### Question 4
+```md
+---
+Write a SV test/checker to detect if all the clocks on the SOC have been switched off after writing 1'b1 to a register
+---
+```
+```md
+**Assumptions**
+- There are clocks clk1, clk2, clk3, clk4 in design and the reference or top master/sampling clock is ref_clk
+- Register/signal is "a" to where we need to write 1'b1 to make them off
+- After writing 1'b1 to register "a", all the clocks are deasserted after a maximum stabilising time say #5 simulation timeunits;
+```
+
+```cpp
+
+module clk_off;
+   bit a; 
+   bit clk1, clk2, clk3, clk4;
+   bit ref_clk;
+
+   event write_to_reg_a;
+
+   always@(posedge ref_clk)
+   begin//
+   if(a)begin
+   #5;
+   -> write_to_reg_a;
+   end
+   end//
+
+   property clk_off_p;
+   @(posedge ref_clk)
+   $rose(a) -> @write_to_reg_a (!clk1 && !clk2 && !clk3 && !clk4 && !ref_clk)
+   endproperty:chk_off_p
+
+   clk_off_chk: assert_property(clk_off_p);
+
+   endmodule: clk_off
+
+
 ```
 
 

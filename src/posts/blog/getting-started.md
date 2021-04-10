@@ -1,6 +1,6 @@
 ---
 title: "System Verilog questions"
-category: "Questions"
+category: "System Verilog"
 date: "2020-01-28 12:00:00 +09:00"
 desc: "SV problem solving questions"
 thumbnail: "./images/getting-started/thumbnail.jpg"
@@ -1127,3 +1127,49 @@ Q16: What is the difference between a bit and logic data type?
 * bit is a 2-state data type that can take only values 0 and 1, while logic is a 4-state data type which can take values 0, 1, x, and z. 
 * 2-state variables will help in a small simulation speed up but should not be used if it is used to drive or sample signals from RTL design in which uninitialized and unknown values will be missed.
 ```
+
+```md
+Q17: Write a code for randomizing the size of a 2D matrix or a multi dimentional array
+```
+```
+SystemVerilog multi-dimensional arrays are more like arrays of arrays. That means you have to deal with each dimension separately, and each elements that is an array needs to be sized.
+```
+```cpp
+class abc;
+
+rand bit [11:0] width[]; //to store width
+rand bit [11:0] height[]; //to store height
+
+rand bit[11:0] md_array [][]; //multidimensional array
+
+constraint width_and_height
+{
+	width.size() inside {[100:5]};
+	height.size() inside {[200:700]};
+}
+
+constraint width_height_and_elements
+{
+	//first assign the size of the first dimension of md_array
+	md_array.size == width.size();
+	//Then for each sub-array in first dimension assign their size
+	foreach(md_array[ii])
+	{
+		md_array[ii].size() == height.size();
+	}
+
+	//Now assign constraint to each elements of md_array
+	foreach(md_array[ii][jj])
+	{
+		md_array[ii][jj] inside {[1:255]};
+	}
+}
+
+	constraint solver 
+	{
+		solve width before height;
+		solve height before md_array;
+	}
+
+endclass : abc
+``` 
