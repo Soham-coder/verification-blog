@@ -116,7 +116,7 @@ addr_mbox.put(tr);//put the tr to address phase mailbox
 end
 endtask:run_phase
 
-task addr();
+void task addr();
 forever begin
 transaction addr_phase;
 addr_mbox.get(addr_phase);
@@ -126,9 +126,9 @@ addr_mbox.get(addr_phase);
 vif.addr <= addr_phase.addr;
 data_mbox.put(addr_phase); //put the tr to data phase mailbox
 end
-endtask:addr
+endtask : addr
 
-task data();
+void task data();
 forever begin
 transaction data_phase;
 data_mbox.get(data_phase);
@@ -136,7 +136,7 @@ repeat(5)@(posedge vif.clk);
 vif.data <= data_phase.data;
 ...
 end
-endtask:data
+endtask : data
 
 endclass: driver
 ```
@@ -169,20 +169,22 @@ addr_phase(req);
 data_phase(req);
 join_none //It will immediately get out and call item_done() and get next sequence_item
 
+endtask : drive_items
+
 void task addr_phase(transaction req);
 
 @(posedge vif.clk);
 vif.addr <= req.addr;
 current_req.push_back(req);
 -> data_phase_start;
-endtask: addr_phase
+endtask : addr_phase
 
 void task data_phase(transaction req);
 @(data_phase_start.triggered);
 current_req.pop_front(req);
 repeat(5)@(posedge vif.clk);
 vif.data <= req.data;
-endtask: data_phase
+endtask : data_phase
 
 endclass:driver
 
