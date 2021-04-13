@@ -1,5 +1,5 @@
 ---
-title: "Implementing a Watchdog timer to catch hang in RTL in case of AXI transactions"
+title: "Implementing a watchdog timer to catch hang in RTL in case of AXI transactions"
 category: "Verification"
 date: "2021-04-11 12:00:00 +09:00"
 desc: "Watchdog Implementation"
@@ -94,13 +94,13 @@ virtual task run_phase(uvm_phase phase);
 ...
 fork 
 ... //Other action items or processes
-keep_watch();
+poll_rvalid();
 ... //Other action items or processes
 join
 
 endtask : run_phase
 
-virtual void task keep_watch();
+virtual void task poll_rvalid();
 
 forever begin //1st forever
 
@@ -128,7 +128,7 @@ if(vif.RVALID)
 
 begin : subsequent_RVALIDS
 $display("Some more RVALIDS encountered after first RVALID @: %0t", $time);
-$display("RESTARTING TIMER WITH TIMEOUT=200");
+$display("RESTARTING TIMER WITH TIMEOUT=1000");
 counter <= TIMEOUT;
 end : sunsequent_RVALIDS
 
@@ -154,7 +154,7 @@ end //2nd forever
 
 end//
 
-endtask : keep_watch 
+endtask : poll_rvalid 
 
 endclass : axi_monitor_MASTER_A
 
