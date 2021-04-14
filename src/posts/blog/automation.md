@@ -309,7 +309,7 @@ First make the script executable (one time)
 - chmod +x makegen.py
 
 Then execute the script to generate Makefile
-- makegen.py --build_dir="." --compiler="g++" --directory="." --output-target="a.out" --source-dir="." --file-type="cpp" -v --config-file="~/makegen.cfg"
+- makegen.py --build_dir="build" --compiler="g++" --directory="." --output-target="a.out" --source-dir="src" --file-type="cpp" -v --config-file="~/makegen.cfg"
 
 ```
 ```mk
