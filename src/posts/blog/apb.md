@@ -575,4 +575,252 @@ endclass : apb_agent
 
 
 
-...More to come!!!
+```cpp
+/********************
+* apb_sequence *
+********************/
+`ifndef APB_SEQUENCE
+	//protection against multiple includes (not mandatory)
+`define APB_SEQUENCE
+
+class apb_sequence extends uvm_sequence # (apb_seq_item);
+  
+  `uvm_object_utils(apb_sequence)
+
+  apb_seq_item req;
+
+  //constructor
+  function new(string name = "apb_sequence");
+    super.new(name);
+  endfunction : new
+
+  //body
+  virtual task body();
+    //create seq_item
+    req = apb_seq_item :: type_id :: create("req");
+    
+    start_item(req);
+    assert(req.randomize());
+    finish_item(req);
+  
+  endtask : body
+
+endclass : apb_sequence
+
+
+`endif
+
+
+```
+
+
+
+
+
+```cpp
+/********************
+* apb_sequence_lib *
+********************/
+`ifndef APB_SEQUENCE_LIB
+	//protection against multiple includes (not mandatory)
+`define APB_SEQUENCE_LIB
+
+////////////////////////////////
+///////    APB_BASE_SEQ  ///////
+////////////////////////////////
+
+class apb_base_seq extends uvm_sequence #(apb_seq_item);
+
+  `uvm_object_utils(apb_base_seq)
+
+  apb_seq_item req;
+
+  //constructor
+  function new(string name="apb_base_seq");
+    super.new(name);
+  endfunction
+
+  virtual task pre_body();
+    `uvm_info({get_type_name(), "FROM_APB_BASE_SEQ"}, {"Entered pre_body of sequence", get_type_name()}, UVM_LOW )
+  endtask : pre_body
+
+  virtual task post_body();
+    `uvm_info({get_type_name(), "FROM_APB_BASE_SEQ"}, {"Entered post_body of sequence", get_type_name()}, UVM_LOW )
+  endtask : post_body
+
+endclass : apb_base_seq
+
+
+////////////////////////////////
+///////   APB_WRITE_SEQ  ///////
+////////////////////////////////
+
+class apb_write_seq extends apb_base_seq;
+
+  `uvm_object_utils(apb_write_seq)
+
+//body task
+  virtual task body();
+    //create seq_item
+    req = apb_seq_item :: type_id :: create("req");
+    //start item
+    start_item(req);
+    //randomize with constraint
+    assert
+    (
+      req.randomize() with
+      
+      { read_write == WRITE; addr > 0; addr < 5; data == $urandom_range(0,51966); };
+    
+    );
+    //finish item
+    finish_item(req);
+  endtask : body
+
+endclass : apb_write_seq
+
+////////////////////////////////
+///////   APB_READ_SEQ  ////////
+////////////////////////////////
+
+class apb_read_seq extends apb_base_seq;
+
+  `uvm_object_utils(apb_read_seq)
+
+  //body task
+  virtual task body();
+  //create seq_item
+    req = apb_seq_item :: type_id :: create("req");
+    //start item
+    start_item(req);
+    //randomize with constraint
+    assert
+    (
+      req.randomize() with
+      
+      { read_write == READ; addr > 0; addr < 5; };
+    
+    );
+    //finish item
+    finish_item(req);
+  endtask : body
+
+endclass : apb_read_seq
+
+
+`endif
+
+```
+
+```cpp
+/********************
+* apb_reg_adapter *
+********************/
+`ifndef APB_REG_ADAPTER
+	//protection against multiple includes (not mandatory)
+`define APB_REG_ADAPTER
+
+//Reg Adapter model translates RAL tx to bus tx by "reg2bus" method
+//Reg Adapter model translates bus tx to RAL tx by "bus2reg" method
+
+//With register model we write and read to DUT registers through RAL methods. 
+//These tx are placed in the DUT bus and thus translation is needed which is done by reg adapter or RAL adapter
+
+
+class apb_reg_adapter extends uvm_reg_adapter;
+  
+  `uvm_object_utils(apb_reg_adapter) //This is just like a translation sequence , so it is a quasi-static object
+
+  //constructor
+  function new(string name = "apb_reg_adapter");
+    super.new(name);
+    supports_byte_enable = 0; //must be 1 if bus protocol allows certain byte lanes to select certain bytes of data bus as valid
+    //In our case there DUT does not support PSTRB (assume for simplicity)
+  endfunction : new
+
+  //function accepts register item of type "uvm_reg_bus_op"
+  //and assigns addr, data etc., to the bus protocol seq_item
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw); 
+  //function arg is passed by reference so that change in any value inside gets reflected outside function also
+  //function arg is passed as const so that it is read only and can be changed by return value of the function only
+
+    apb_seq_item tr;
+    tr = apb_seq_item :: type_id :: create("tr");
+    tr.addr = rw.addr;
+    tr.data = rw.data;
+    tr.read_write = (rw.kind == UVM_READ) ? READ : WRITE ; //set rw.kind = UVM_READ iff tr.read_write = READ
+
+    `uvm_info({get_type_name(),"FROM APB_REG_ADAPTER"}, {"reg2bus tr = " , "\n", tr.sprint()}, UVM_LOW)
+    return tr;
+
+  endfunction : reg2bus
+
+
+  //function accepts a bus_seq_item and assigns addr, data etc., to register items
+  virtual function void bus2reg (uvm_sequence_item bus_tr, ref uvm_reg_bus_op rw);
+  //function arg is passed by reference so that change in any value inside gets reflected outside function also
+    bit not_same_type;
+    apb_seq_item tr;
+    not_same_type = ! $cast(tr, bus_tr);
+    if(not_same_type)
+      `uvm_fatal({get_type_name(),"FROM APB_REG_ADAPTER"}, "Cannot convert bus_item to reg ... invalid type detected!")
+    
+    rw.kind = (tr.read_write == READ) ? UVM_READ : UVM_WRITE;
+    rw.addr = tr.addr;
+    rw.data = tr.data;
+    rw.status = UVM_IS_OK; //APB does not support slave response
+    
+    `uvm_info({get_type_name(), "FROM APB_REG_ADAPTER"}, {"bus2reg rw = ", "\n", rw.sprint()}, UVM_LOW)
+  
+  endfunction : bus2reg
+
+endclass : apb_reg_adapter
+
+
+`endif
+```
+
+
+```cpp
+/********************
+* apb_pkg *
+********************/
+`ifndef APB_PKG
+	//protection against multiple includes (not mandatory)
+`define APB_PKG
+
+`include "apb_if.sv" //interface is static so outside package
+
+package apb_pkg;
+  import uvm_pkg::*;
+
+  `include "uvm_macros.svh"
+  
+  `include "apb_vif.sv"
+  `include "apb_defines.sv"
+  
+  `include "apb_seq_item.sv"
+  
+  `include "apb_sequencer.sv"
+  `include "apb_driver.sv"
+  `include "apb_monitor.sv"
+  `include "apb_agent.sv"
+  
+  `include "apb_reg_adapter.sv"
+  
+  `include "apb_sequence.sv"
+  `include "apb_sequence_lib.sv"
+
+endpackage : apb_pkg
+
+
+`endif
+
+```
+
+
+
+```
+Now you can import apb_package as a UVC package library and reuse it across all projects horizontally and vertically! :) 
+```
+
