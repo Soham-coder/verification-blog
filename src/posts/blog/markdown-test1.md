@@ -98,6 +98,7 @@ class driver extends uvm_driver#(transaction);
 ... 
 
 //Mailbox has blocking methods so will maintain synchronisation
+//Mailbox are special queues with sempahores implemented within them to maintain atomic process control
 mbox addr_mbox;
 mbox data_mbox
 transaction tr;

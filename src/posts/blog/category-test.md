@@ -129,9 +129,67 @@ end
 
 endmodule
 ```              
-
 ```md
+Q2 (contd.): Can you give a general solution of the above where clock will be divided by 2N where N belongs to any +ve integer
 ---
+```
+```
+Sol: We can maintain a count of every posedge of input clock.
+Once it reaches the count N we can invert the output clock.
+```
+
+```cpp
+
+//We create a module which will divide the input clock by 2*N
+
+module clk_by_2N
+#
+( 
+    parameter N = 6, //(In this case 2*6 = 12--> 1/12 divider)
+    parameter WIDTH = $ceil($clog2(N)) + 1
+)
+
+(
+    rst,
+    clk,
+    clk_by_2N
+);
+
+input  rst;
+input  clk;
+output clk_by_2N;
+
+reg  [WIDTH - 1:0] now;
+wire [WIDTH - 1:0] next;
+
+reg clk_out;
+
+always@(posedge clk)begin//always
+if(rst)
+begin
+now <= 0;
+clk_out <= 0;
+end
+
+else if(next == N)
+begin
+now <= 0;
+clk_out <= ~clk_out;
+end
+
+else
+now <= next;
+
+
+end//always
+
+assign next = now + 1;
+assign clk_by_2N = clk_out;
+
+endmodule : clk_by_2N
+
+
+```
 Q3: Draw a state machine for a sequence detector which can detect the pattern 1010 [01*] 0111
 
 Here [01*] means that any number of 0s followed by any number of 1s

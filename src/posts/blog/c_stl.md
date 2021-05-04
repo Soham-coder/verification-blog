@@ -1,6 +1,6 @@
 ---
 title: "STL in C"
-category: "C"
+category: "General"
 date: "2021-04-11 12:00:00 +09:00"
 desc: "Some STL Implementation in C"
 thumbnail: "./images/c_stl/scoreboard.png"
