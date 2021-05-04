@@ -187,7 +187,7 @@ assign next = now + 1;
 assign clk_by_2N = clk_out;
 
 endmodule : clk_by_2N
-
+```
 
 ```
 Q3: Draw a state machine for a sequence detector which can detect the pattern 1010 [01*] 0111
