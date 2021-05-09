@@ -177,7 +177,7 @@ interface ycbcr_if(input clk, rst);
 endinterface : ycbcr_if
 ```
 
-The SystemVerilog implementation of the RGB2YCbCr converter can be seen below:
+The SystemVerilog implementation of the RGB\_2\_YCbCr converter can be seen below:
 
 ```cpp
 //main converter module
@@ -199,9 +199,9 @@ module RGB_2_YCbCr(rgb_if.in in, ycbcr_if.out out);
 endmodule : RGB_2_YCbCr
 ```
 
-The SystemVerilog implementation of the testbench of the RGB_2_YCbCr is shown below. 
+The SystemVerilog implementation of the testbench of the RGB\_2\_YCbCr is shown below. 
 
-The ROM provides the pixels to stimulate the RGB_2_YCbCr module.
+The ROM provides the pixels to stimulate the RGB\_2\_YCbCr module.
 
 ```cpp
 //ROM giving RGB inputs
