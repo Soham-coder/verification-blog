@@ -143,7 +143,7 @@ p_b_chk: assert property (p_b);
 property p_c;
  @(posedge clk)
   (valid && !ready)
-   |-> ##1 valid; //because valid can get deasserted only after ready comes
+   |-> ##1 valid throughout (ready[->1]); //because valid can get deasserted only after ready comes, so check for high valid until ready comes
 endproperty
 p_c_chk: assert property (p_c);
 ```
