@@ -146,7 +146,7 @@ assign  #10 clk_ref = clk_in;
 //gate = 1
 property gate_1;
 @(posedge clk_ref)
-$rose(gate) |-> clk_out == 0;
+$rose(gate) ##0 clk_out === 0 |-> (clk_out===0 throughout !gate[->1]);
 endproperty
 
 //gate = 0
