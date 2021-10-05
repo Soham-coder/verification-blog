@@ -18,7 +18,7 @@ Write an assertion and also a cover property for the same. The assertion should 
 ```cpp
 property y_after_x(x_sig, y_sig);
 @(posedge clk) disable iff (!rst_n)
-x_sig |-> y_sig;
+x_sig |-> ##1 y_sig;
 endproperty
 
 Y_AFTER_X_ASSERT: assert property (y_after_x(x_sig, y_sig))
@@ -210,8 +210,15 @@ Q7: Write a property/assertion for I2C protocol to check SDA remaining stable du
 ---
 ```
 ```cpp
+
+initial
+forever
+#1ps clk = !clk;
+ //make a free running fast clock
 property SDA_STABLE_WHILE_SCL_HIGH;
-@(posedge clk)
-$rose(scl) |-> (sda && scl == 1) || (!sda && scl == 1) throughout !(scl[->1]); //SDA remains wholly 1 or 0 until SCL becomes 0,.i.e., no glitch in SDA
+@(posedge high_freq_clk) disable iff (intf.scl === 0 || intf.start === 1 || intf.stop === 1 || intf.idle === 1)
+$rose(scl) |-> (sda === $past(sda,1) throughout !(scl[->1]); //SDA remains wholly 1 or 0 until SCL becomes 0,.i.e., no glitch in SDA
 endproperty
+
+A0_ASSERT : assert property (SDA_STABLE_WHILE_SCL_HIGH);
 ```
