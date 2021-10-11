@@ -219,7 +219,7 @@ forever
  //make a free running fast clock
 property SDA_STABLE_WHILE_SCL_HIGH;
 @(posedge high_freq_clk) disable iff (scl === 0 || intf.start === 1 || intf.stop === 1 || intf.idle === 1)
-$rose(scl) |-> (sda === $past(sda,1) throughout !(scl[->1]); //SDA remains wholly 1 or 0 until SCL becomes 0,.i.e., no glitch in SDA
+(scl===1) |->  sda === $past(sda) throughout !(scl[->1]); //SDA remains wholly 1 or 0 until SCL becomes 0,.i.e., no glitch in SDA
 endproperty
 
 A0_ASSERT : assert property (SDA_STABLE_WHILE_SCL_HIGH);
