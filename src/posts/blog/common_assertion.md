@@ -1,8 +1,8 @@
 ---
-title: "Some common assertions"
+title: "Assertions"
 category: "System Verilog"
 date: "2021-01-28 12:00:00 +09:00"
-desc: "Some common assertions"
+desc: "Assertions"
 thumbnail: "./images/assertion.jpg"
 alt: "apple big sur gradient"
 ---
