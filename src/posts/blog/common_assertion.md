@@ -224,3 +224,28 @@ endproperty
 
 A0_ASSERT : assert property (SDA_STABLE_WHILE_SCL_HIGH);
 ```
+
+```md
+---
+Q8: Write an property to check if signal "x" is equal to previous "x", signal y would be 0 
+---
+```
+```cpp
+property check_1;
+$past(x) === (x) |-> ! y;
+endproperty
+
+check_1_1: assert property (@posedge(clk) check_1);
+```
+```md
+---
+Q9: Write an property to check if signal "y" is asserted only when input edge is detected in signal x   
+---
+```
+```cpp
+property check_2;
+y |-> $past(x) !== (x);
+endproperty
+
+check_2_2: assert property (@posedge(clk) check_2);
+```
