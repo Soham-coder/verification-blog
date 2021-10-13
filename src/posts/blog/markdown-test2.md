@@ -37,6 +37,43 @@ Following things can be verified with assertion-
 
 4) If there are no requests, there cannot be any grants asserted
 
+5) If not in reset, none of the grants should go to unknown. 
+
+```
+
+```md
+---
+Q) Write a assertion to check that arbiter should assert one of the grants at given time or no grants at all in given time
+---
+```
+
+```cpp
+only_1_grant : assert ( $isonehot0({grant1, grant2, grant3, ...}) ) 
+else 
+begin 
+$error("..."); 
+end
+```
+
+```md
+---
+Q) Write a checker to check If not in reset, none of the grants should go to unknown
+---
+```
+
+```cpp
+always@(posedge clk)
+begin///
+
+if(!reset)begin//
+grant_not_unknown : assert ( not( isunknown({grant1, grant2, grant3, ...}) ) ) 
+else begin
+$error("going to X/Z");
+end
+
+end//
+
+end///
 ```
 #### Stretch question on above
 ```md
