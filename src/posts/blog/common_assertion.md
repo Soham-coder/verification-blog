@@ -101,7 +101,7 @@ Q5: Write a property/assertion to check if signal is toggling
 property sig_toggle;
 realtime first_change;
 @(sig)
-(1, first_change = $realtime) => 0; //at change in signal sig store the time in a local variable and check for change to 0
+(1, first_change = $realtime) => 0; //at change in signal sig store the time in a local variable and indicate a hard failure at the consequent
 endproperty
 ```
 
@@ -230,6 +230,7 @@ A0_ASSERT : assert property (SDA_STABLE_WHILE_SCL_HIGH);
 Q8: Write an property to check if signal "x" is equal to previous "x", signal y would be 0 
 ---
 ```
+
 ```cpp
 property check_1;
 $past(x) === (x) |-> ! y;
@@ -237,15 +238,53 @@ endproperty
 
 check_1_1: assert property (@posedge(clk) check_1);
 ```
+
 ```md
 ---
 Q9: Write an property to check if signal "y" is asserted only when input edge is detected in signal x   
 ---
 ```
+
 ```cpp
 property check_2;
 y |-> $past(x) !== (x);
 endproperty
 
 check_2_2: assert property (@posedge(clk) check_2);
+```
+```md
+---
+Q10: Check that "writedata" should not go to unknown when "write_enable" becomes 0   
+---
+```
+
+```cpp
+property checkwrData;
+@(posedge clk)
+$fell(write_enable) |-> not($isunknown(writedata)); //writedata cannot go to unknown when write_enable falls to 0
+endproperty
+```
+
+```md
+---
+Q11: Make sure FSM does not get stuck in current State except 'IDLE'   
+---
+```
+
+```cpp
+property StuckState;
+@(posedge clk) disable iff(rst)
+( current_state !== IDLE && $stable(current_state) ) [*64] |=> 0; //If current state is not Idle and it is stuck for 64 clock cycles indicate a hard failure
+endproperty
+
+```
+
+```md
+---
+Q12: Make sure signal toggles in the pattern "010101..." or "101010..."   
+---
+```
+
+```cpp
+assert property ( @(posedge clk) ##1 $changed(signal) ); //For every clock, in the next clock edge signal value should be opposite to previous clock edge
 ```
