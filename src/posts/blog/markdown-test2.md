@@ -66,7 +66,7 @@ always@(posedge clk)
 begin///
 
 if(!reset)begin//
-grant_not_unknown : assert ( not( isunknown({grant1, grant2, grant3, ...}) ) ) 
+grant_not_unknown : assert ( not( $isunknown({grant1, grant2, grant3, ...}) ) ) 
 else begin
 $error("going to X/Z");
 end
