@@ -37,7 +37,12 @@ Q2: Signal x should remain high or stable until signal y is asserted. Write a pr
 property a_o(x,y);
 @(posedge clk)
 (x && !y) |-> (x throughout y[->1]); //x should remain high until 1st occurence of y becoming high
-endproperty 
+endproperty
+
+property a_o(x,y);
+@(posedge clk)
+x |-> $stable(x)[*1:$] ##0 y; //x should remain stable until y arrives
+endproperty
 ```
 
           
