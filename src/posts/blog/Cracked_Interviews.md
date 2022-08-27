@@ -16,8 +16,10 @@ The companies and the roles I cracked are the Following:-
 AMD - Silicon Design Engineer-2
 Qualcomm - Senior Engineer(CPU Verification)
 Western Digital - System Design Engineer(NAND)
+Micron - Senior ASIC DV Engineer
 Marvell Semiconductor - Staff Verification Engineer
 Synopsys - Application Engineer 2 and ASIC Digital Design Engineer 2
+
 
 APT Portfolio (HFT Firm based out of New Delhi) - Hardware Engineer 
 This is one of the toughest interviews I faced.
