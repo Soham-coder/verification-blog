@@ -19,10 +19,10 @@ Western Digital - System Design Engineer(NAND)
 Micron - Senior ASIC DV Engineer
 Marvell Semiconductor - Staff Verification Engineer
 Synopsys - Application Engineer 2 and ASIC Digital Design Engineer 2
-
+Axelera AI (A EU based deep tech startup based out of Eindhoven, Netherlands) - Verification Engineer
 
 APT Portfolio (HFT Firm based out of New Delhi) - Hardware Engineer 
-This is one of the toughest interviews I faced
+One of the tough interviews I faced
 
 ```
 
