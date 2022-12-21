@@ -1,5 +1,6 @@
 {
   "name": "@sungik-choi/gatsby-starter-apple",
+  "homepage": ".",
   "description": "Gatsby blog starter kit with beautiful and simple design",
   "version": "1.0.0",
   "license": "MIT",
